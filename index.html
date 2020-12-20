@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>JVStream by ExAtom</title>
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="JVStream">
+  <meta name="msapplication-TileColor" content="#c8d2e6">
+  <meta name="theme-color" content="#db6205">
+  <meta name="description" content="JustVidman videók 0-24">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" href="/icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#db6205">
+  <link rel="shortcut icon" href="/favicon.ico">
+
+  <style>
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      height: 100%;
+    }
+  </style>
+
+  <script>
+    function main(c) {
+      const doAjax = async () => {
+        const response = await fetch("videos.json");
+        if (response.ok) {
+          const jVal = await response.json();
+          return Promise.resolve(jVal);
+        } else return Promise.reject("JSON file not found");
+      };
+      doAjax().then((vids) => {
+        let d = new Date();
+        let i = 0;
+        let t = 0;
+        for (let v of vids) t += v.len;
+        let o = Math.floor(d.getTime() / 1000) % t;
+        while (o >= vids[i].len) o -= vids[i++].len;
+        if (c == 1) o = 0;
+        document.getElementById(
+          "body"
+        ).innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vids[i].id}?autoplay=1&start=${o}&controls=0" frameborder="0" allowfullscreen></iframe>`;
+        setTimeout(() => {
+          main(1);
+        }, (vids[i].len - o) * 1000 + 2000);
+      });
+    }
+  </script>
+  <script src="/upup.min.js"></script>
+  <script>
+    UpUp.start({
+      'content-url': 'index.html',
+      'assets': [
+        'videos.json'
+      ]
+    });
+  </script>
+</head>
+
+<body id="body" onload="main(0)"></body>
+
+</html>
